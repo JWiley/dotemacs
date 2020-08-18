@@ -1,14 +1,45 @@
 ;; garbage colleciton
 (setq gc-cons-threshold 20000000 )
 
-;; location for R program
-(setq inferior-R-program-name "c:/usr/R/R-4.0.2/bin/x64/Rterm.exe")
-
 ;; repos
-(custom-set-variables '(package-archives
-                        '(("marmalade" . "https://marmalade-repo.org/packages/")
-                          ("melpa"     . "https://melpa.org/packages/")
-                          ("elpa"      . "https://elpa.gnu.org/packages/"))))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-archives
+   '(("marmalade" . "https://marmalade-repo.org/packages/")
+     ("melpa" . "https://melpa.org/packages/")
+     ("elpa" . "https://elpa.gnu.org/packages/")))
+ '(package-selected-packages
+   '(color-theme-sanityinc-tomorrow
+     auctex ess treemacs-persp treemacs-magit
+     treemacs-icons-dired treemacs-projectile treemacs yasnippet
+     poly-R poly-markdown markdown-mode magit
+     projectile company helm wc-mode diminish
+     smooth-scrolling use-package))
+ '(read-buffer-completion-ignore-case t)
+ '(read-file-name-completion-ignore-case t)
+ ;; get column numbers on by default
+ '(column-number-mode t)
+ ;; no splash screen
+ '(inhibit-startup-message t)
+ ;; Make completion case-insensitive. 
+ '(completion-ignore-case t)
+ ;; where is the Rterm located?
+ '(inferior-R-program-name "c:/usr/R/R-4.0.2/bin/x64/Rterm.exe")
+ ;; do not restore or ask to save workspace
+ '(inferior-R-args "--no-restore --no-save")
+ 
+ ;; ;; julia lang location if using
+ ;; '(inferior-julia-program-name "C:/usr/julia/julia-d6f7c7c781/bin/julia-basic.exe")
+
+ ;; spelling program exe location
+ ;; https://sourceforge.net/projects/ezwinports/files/
+ '(ispell-program-name "c:/usr/hunspell/bin/hunspell.exe")
+ ;; location of pandoc for rendering / converting markdown
+ '(markdown-command "C:/usr/Pandoc/pandoc.exe")
+ )
 
 ;; use-package to auto get packages
 (package-initialize)
@@ -25,16 +56,6 @@
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)
 (setq default-buffer-file-coding-system 'utf-8)
-
-
-;; Make completion case-insensitive.
-(setq completion-ignore-case t)
-(custom-set-variables
- '(read-buffer-completion-ignore-case t)
- '(read-file-name-completion-ignore-case t))
-
-;; start emacs server
-(server-start)
 
 ;; show line numbers
 (use-package display-line-numbers
@@ -111,7 +132,7 @@
   (("C-x C-f"       . helm-find-files)
    ("C-x C-b"       . helm-buffers-list)
    ("C-x b"         . helm-multi-files)
-   ("M-x"           . helm-M-x)
+   ;; ("M-x"           . helm-M-x)
    :map helm-find-files-map
    ("C-<backspace>" . helm-find-files-up-one-level)
    ("C-f"           . helm-execute-persistent-action)
@@ -146,6 +167,7 @@
 (helm-autoresize-mode 1)
 
 (use-package helm-flx
+  :ensure t
   :custom
   (helm-flx-for-helm-find-files t)
   (helm-flx-for-helm-locate t)
@@ -153,6 +175,7 @@
   (helm-flx-mode +1))
 
 (use-package swiper-helm
+  :ensure t
   :bind
   ("C-s" . swiper))
 
@@ -200,15 +223,15 @@
 (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
 (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
 
-
 ;; on the fly spell checking
 (use-package flyspell
   :ensure t
-  :diminish)
+  :diminish
+  :config
+  ;; turn on flyspell checking by default
+  (add-hook 'text-mode-hook 'flyspell-mode)
+  (add-hook 'prog-mode-hook 'flyspell-prog-mode))
 
-;; turn on flyspell checking by default
-(add-hook 'text-mode-hook 'flyspell-mode)
-(add-hook 'prog-mode-hook 'flyspell-prog-mode)
 
 ;; git interface
 (use-package magit
@@ -242,9 +265,6 @@
 ;; sufficient for R + markdown?
 (use-package poly-R
   :ensure t)
-
-;; (add-to-list 'auto-mode-alist '("\\.md" . poly-markdown-mode))
-;; (add-to-list 'auto-mode-alist '("\\.Rmd" . poly-markdown-mode))
 
 ;; expand snippets of text
 (use-package yasnippet
@@ -303,7 +323,7 @@
 
     ;; The default width and height of the icons is 22 pixels. If you are
     ;; using a Hi-DPI display, uncomment this to double the icon size.
-    (treemacs-resize-icons 44)
+    ;; (treemacs-resize-icons 44)
 
     (treemacs-follow-mode t)
     (treemacs-filewatch-mode t)
@@ -341,112 +361,38 @@
   :ensure t
   :config (treemacs-set-scope-type 'Perspectives))
 
-; auto save bookmarks
-(setq
-   bookmark-default-file "~/OneDrive/.emacs.bmk"
-   bookmark-version-control t
-   bookmark-save-flag 1)
-
 ;; emacs speaks statistics --- central to using R in Emacs!
 (use-package ess
-  :ensure t)
+  :ensure t
+  :custom
+  (ess-ask-for-ess-directory . nil))
 
 ;; only R features, not all ESS by default
 (require 'ess-r-mode)
 
-;; do not prompt for directory when starting R
-(setq ess-ask-for-ess-directory nil) 
-
 ;; for latex stuff
-(use-package auctex
-  :ensure t)
-
-;; no tool bar and add column numbers
-(tool-bar-mode -1)
-(setq column-number-mode t)
-
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(ess-R-font-lock-keywords
-   (quote
-    ((ess-R-fl-keyword:modifiers . t)
-     (ess-R-fl-keyword:fun-defs . t)
-     (ess-R-fl-keyword:keywords . t)
-     (ess-R-fl-keyword:assign-ops . t)
-     (ess-R-fl-keyword:constants . t)
-     (ess-fl-keyword:fun-calls . t)
-     (ess-fl-keyword:numbers . t)
-     (ess-fl-keyword:operators . t)
-     (ess-fl-keyword:delimiters . t)
-     (ess-fl-keyword:=)
-     (ess-R-fl-keyword:F&T)
-     (ess-R-fl-keyword:%op% . t))))
-
-  ;; '(inhibit-startup-screen t)
-  ;; '(initial-buffer-choice t)
-  ;; '(load-home-init-file t t)
-  '(markdown-command "C:/usr/Pandoc/pandoc.exe")  ;; tell it where pandoc is
-)
-
-(set-face-font 'default "-outline-Consolas-normal-r-normal-normal-*-*-96-96-c-*-iso8859-1")
-(set-face-font 'bold "-outline-Consolas-bold-r-normal-normal-*-*-96-96-c-*-iso8859-1")
-(set-face-font 'italic "-outline-Consolas-normal-i-normal-normal-*-*-96-96-c-*-iso8859-1")
-(set-face-font 'bold-italic "-outline-Consolas-bold-i-normal-normal-*-*-96-96-c-*-iso8859-1")
+(use-package tex
+  :defer t
+  :ensure auctex
+  :config
+  (setq TeX-auto-save t))
 
 (add-to-list 'ess-style-alist
              '(my-style
                (ess-indent-level . 2)
-               ;; (ess-first-continued-statement-offset . 2)
-               ;; (ess-continued-statement-offset . 0)
-               ;; (ess-brace-offset . -2)
-               ;; (ess-expression-offset . 2)
-               ;; (ess-else-offset . 0)
-               ;; (ess-close-brace-offset . 0)
-               ;; (ess-brace-imaginary-offset . 0)
-               ;; (ess-continued-brace-offset . 0)
-               ;; (ess-arg-function-offset . 2)
-	       ;; (ess-arg-function-offset-new-line . '(2))
                ))
 
-(setq ess-default-style 'my-style)
+(setq ess-style 'my-style)
+
+(define-key ess-r-mode-map "_" #'ess-insert-assign)
+(define-key inferior-ess-r-mode-map "_" #'ess-insert-assign)
 
 ;; sanityinc tomorrow night theme
 (use-package color-theme-sanityinc-tomorrow
   :ensure t)
 (load-theme 'sanityinc-tomorrow-night t)
 
-;; ;; not sure this is needed anymore?
-;; (use-package flx
-;;   :ensure t
-;;   :config
-;;   (use-package flx-ido
-;;     :ensure t
-;;     :config
-;;     (ido-mode 1)
-;;     (ido-everywhere 1)
-;;     (flx-ido-mode 1)
-;;     (setq ido-enable-flex-matching t)
-;;     (setq ido-use-faces nil)
-;;     )
-;;   )
-
-;; ;; collapse / fold code chunks, no longer using
-;; (use-package folding
-;;   :ensure t
-;;   :config
-;;   (folding-add-to-marks-list 'ess-mode "##{{{" "##}}}" nil t)
-;;   (add-hook 'ess-mode-hook 'turn-on-folding-mode)
-;;   (global-set-key [f9] 'folding-hide-current-entry)
-;;   (global-set-key [f10] 'folding-show-current-entry))
-
-;; (setq inferior-julia-program-name "C:/usr/julia/julia-d6f7c7c781/bin/julia-basic.exe")
+;; no tool bar and add column numbers
+(tool-bar-mode -1)
 
 
-;; ;; Appearance Related Things
-;; (custom-set-faces)
-
-;; (add-to-list 'auto-mode-alist '("\\.Rmd" . poly-markdown-mode))
-;; (add-to-list 'auto-mode-alist '("\\.Rmd" . poly-markdown+r-mode))

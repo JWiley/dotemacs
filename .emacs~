@@ -1,34 +1,93 @@
-;; code to get use-package
-(require 'package)
-(setq package-enable-at-startup nil)
-(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
-;;(add-to-list 'package-archives '("marmalade" . "http://marmalade-repo.org/packages/"))
-(add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/"))
+;; garbage colleciton
+(setq gc-cons-threshold 20000000 )
+
+;; location for R program
+(setq inferior-R-program-name "c:/usr/R/R-4.0.2/bin/x64/Rterm.exe")
+
+;; repos
+(custom-set-variables '(package-archives
+                        '(("marmalade" . "https://marmalade-repo.org/packages/")
+                          ("melpa"     . "https://melpa.org/packages/")
+                          ("elpa"      . "https://elpa.gnu.org/packages/"))))
+
+;; use-package to auto get packages
 (package-initialize)
-
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
+(when (not package-archive-contents)
+  (package-refresh-contents))
+(when (not (package-installed-p 'use-package))
   (package-install 'use-package))
+(require 'use-package)
 
-(eval-when-compile
-  (require 'use-package))
-(require 'diminish)
+;; use utf 8 throughout
+(set-language-environment "UTF-8")
+(prefer-coding-system       'utf-8)
+(set-default-coding-systems 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+(setq default-buffer-file-coding-system 'utf-8)
+
+
+;; Make completion case-insensitive.
+(setq completion-ignore-case t)
+(custom-set-variables
+ '(read-buffer-completion-ignore-case t)
+ '(read-file-name-completion-ignore-case t))
+
+;; start emacs server
+(server-start)
+
+;; show line numbers
+(use-package display-line-numbers
+  :ensure t
+  :config
+  (global-display-line-numbers-mode))
+
+;; hightlight matching parens
+(show-paren-mode)
+
+;; scroll one line at a time
+(use-package smooth-scrolling
+  :ensure t  
+  :config
+  (smooth-scrolling-mode 1))
+
+;; manage key bindings
+;; comes with use-package ?
 (require 'bind-key)
 
-;; recommended for flx-ido
-(setq gc-cons-threshold 20000000)
+;; M-g to go to a specific line in a file
+(bind-key "M-g" 'goto-line)
 
-;; better images
-;; (use-package image+
-;;   :ensure t
-;;   :config
-;;   (imagex-auto-adjust-mode 1))
+;; org mode configuration
+(use-package org
+  :ensure t)
 
+;;; setup org-mode and org-babel
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((R   .t)
+   (org .t) ))
 
-(use-package magit
-  :ensure t
-  :bind (("C-x g" . magit-status)))
+;; fontify code in code blocks
+(setq org-src-fontify-natively t)
 
+(add-hook 'org-babel-after-execute-hook 'org-display-inline-images)
+(add-hook 'org-mode-hook 'org-display-inline-images)
+
+;; diminish
+(use-package diminish
+  :ensure t)
+
+;; included with emacs
+;; help tell different file names apart
+(use-package uniquify
+  :ensure nil
+  :custom
+  (uniquify-after-kill-buffer-p t)
+  (uniquify-buffer-name-style 'post-forward)
+  (uniquify-strip-common-suffix t))
+
+;; show recent files / buffers used
 (use-package recentf
   :ensure t
   :config
@@ -36,49 +95,80 @@
   (setq recentf-max-menu-items 25)
   (global-set-key "\C-x\ \C-r" 'recentf-open-files))
 
-;; use projectile for project management
-(use-package projectile
+;; word counts
+(use-package wc-mode
   :ensure t
-  :defer t
+  :hook
+  (org-mode . wc-mode))
+
+
+;; https://zzamboni.org/post/my-emacs-configuration-with-commentary/
+;; copied as trying out and not familiar with helm
+(use-package helm
+  :ensure t
+  :diminish helm-mode
+  :bind
+  (("C-x C-f"       . helm-find-files)
+   ("C-x C-b"       . helm-buffers-list)
+   ("C-x b"         . helm-multi-files)
+   ("M-x"           . helm-M-x)
+   :map helm-find-files-map
+   ("C-<backspace>" . helm-find-files-up-one-level)
+   ("C-f"           . helm-execute-persistent-action)
+   ([tab]           . helm-ff-RET))
+  :config
+  (defun daedreth/helm-hide-minibuffer ()
+    (when (with-helm-buffer helm-echo-input-in-header-line)
+      (let ((ov (make-overlay (point-min) (point-max) nil nil t)))
+        (overlay-put ov 'window (selected-window))
+        (overlay-put ov 'face
+                     (let ((bg-color (face-background 'default nil)))
+                       `(:background ,bg-color :foreground ,bg-color)))
+        (setq-local cursor-type nil))))
+  (add-hook 'helm-minibuffer-set-up-hook 'daedreth/helm-hide-minibuffer)
+  (setq helm-autoresize-max-height 0
+        helm-autoresize-min-height 40
+        helm-M-x-fuzzy-match t
+        helm-buffers-fuzzy-matching t
+        helm-recentf-fuzzy-match t
+        helm-semantic-fuzzy-match t
+        helm-imenu-fuzzy-match t
+        helm-split-window-in-side-p nil
+        helm-move-to-line-cycle-in-source nil
+        helm-ff-search-library-in-sexp t
+        helm-scroll-amount 8
+        helm-echo-input-in-header-line nil
+        completion-styles '(helm-flex))
   :init
-  (projectile-global-mode)
-  :config
-  (setq projectile-indexing-method 'alien))
+  (helm-mode 1))
 
-(projectile-mode +1)
-(define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
-(define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+(require 'helm-config)
+(helm-autoresize-mode 1)
 
-(use-package flx
-  :ensure t
+(use-package helm-flx
+  :custom
+  (helm-flx-for-helm-find-files t)
+  (helm-flx-for-helm-locate t)
   :config
-  (use-package flx-ido
-    :ensure t
-    :config
-    (ido-mode 1)
-    (ido-everywhere 1)
-    (flx-ido-mode 1)
-    (setq ido-enable-flex-matching t)
-    (setq ido-use-faces nil)
-    )
-  )
+  (helm-flx-mode +1))
+
+(use-package swiper-helm
+  :bind
+  ("C-s" . swiper))
 
 ;; company mode for auto-completion
 (use-package company
   :ensure t
   :defer t
-  :init (add-hook 'after-init-hook 'global-company-mode)
+  :diminish company-mode
+  :hook
+  (after-init . global-company-mode)
   :config
   (setq company-idle-delay 0.0 ;; delay before pop-up
 	company-require-match nil) ;; cancel if input doesn't match
   ;; complete using C-TAB
   (global-set-key (kbd "<C-tab>") 'company-complete)
-  ;; use C-n and C-p to cycle through completions
   (define-key company-mode-map (kbd "<C-tab>") 'company-complete)
-  ;; (define-key company-active-map (kbd "C-n") 'company-select-next)
-  ;; (define-key company-active-map (kbd "<tab>") 'company-complete-common)
-  ;; (define-key company-active-map (kbd "C-p") 'company-select-previous)
-  ;; (define-key company-active-map (kbd "<backtab>") 'company-select-previous)
 
   (require 'company-capf)
   (setq company-backends
@@ -98,29 +188,71 @@
   (add-hook 'after-init-hook 'global-company-mode)
   )
 
-(use-package folding
+;; use projectile for project management
+(use-package projectile
   :ensure t
-  :config
-  (folding-add-to-marks-list 'ess-mode "##{{{" "##}}}" nil t)
-  (add-hook 'ess-mode-hook 'turn-on-folding-mode)
-  (global-set-key [f9] 'folding-hide-current-entry)
-  (global-set-key [f10] 'folding-show-current-entry))
+  :defer t
+  :diminish projectile-mode
+  :init
+  (projectile-global-mode))
 
+(projectile-mode +1)
+(define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
+(define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+
+
+;; on the fly spell checking
+(use-package flyspell
+  :ensure t
+  :diminish)
+
+;; turn on flyspell checking by default
+(add-hook 'text-mode-hook 'flyspell-mode)
+(add-hook 'prog-mode-hook 'flyspell-prog-mode)
+
+;; git interface
+(use-package magit
+  :ensure t
+  :diminish auto-revert-mode
+  :bind
+  (("C-x g" . magit-status)
+   :map magit-status-mode-map
+   ("q"       . magit-quit-session))
+  :config
+  (defadvice magit-status (around magit-fullscreen activate)
+    "Make magit-status run alone in a frame."
+    (window-configuration-to-register :magit-fullscreen)
+    ad-do-it
+    (delete-other-windows))
+
+  (defun magit-quit-session ()
+    "Restore the previous window configuration and kill the magit buffer."
+    (interactive)
+    (kill-buffer)
+    (jump-to-register :magit-fullscreen)))
+
+;; markdown mode
+(use-package markdown-mode
+  :ensure t)
+
+;; various poly modes
+(use-package poly-markdown
+  :ensure t)
+
+;; sufficient for R + markdown?
+(use-package poly-R
+  :ensure t)
+
+;; (add-to-list 'auto-mode-alist '("\\.md" . poly-markdown-mode))
+;; (add-to-list 'auto-mode-alist '("\\.Rmd" . poly-markdown-mode))
+
+;; expand snippets of text
 (use-package yasnippet
   :ensure t
   :init
   (yas-global-mode 1))
 
-(use-package poly-markdown
-  :ensure t)
-
-(use-package poly-R
-  :ensure t)
-
-(use-package poly-noweb
-  :ensure t)
-
-
+;; tree dir / file viewer
 (use-package treemacs
   :ensure t
   :defer t
@@ -209,59 +341,27 @@
   :ensure t
   :config (treemacs-set-scope-type 'Perspectives))
 
-
-
-;; ;; use anaconda-mode for python
-;; (use-package anaconda-mode
-;;   :ensure t)
-;; ;; use pyvenv for virtual environments
-;; (use-package pyvenv
-;;   :ensure t)
-;; (add-hook 'python-mode-hook 'anaconda-mode)
-;; (setenv "WORKON_HOME" "c:/usr/Anaconda3/envs/")
-;; (pyvenv-mode 1)
-
-;;; setup org-mode and org-babel
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((R . t)))
-
-;; fontify code in code blocks
-(setq org-src-fontify-natively t)
-
-(add-hook 'org-babel-after-execute-hook 'org-display-inline-images)
-(add-hook 'org-mode-hook 'org-display-inline-images)
-
 ; auto save bookmarks
 (setq
    bookmark-default-file "~/OneDrive/.emacs.bmk"
    bookmark-version-control t
    bookmark-save-flag 1)
 
-(defun dos2unix ()
-  "Convert a DOS formatted text buffer to UNIX format"
-  (interactive)
-  (set-buffer-file-coding-system 'undecided-unix nil))
+;; emacs speaks statistics --- central to using R in Emacs!
+(use-package ess
+  :ensure t)
 
-(defun unix2dos ()
-  "Convert a UNIX formatted text buffer to DOS format"
-  (interactive)
-  (set-buffer-file-coding-system 'undecided-dos nil))
+;; only R features, not all ESS by default
+(require 'ess-r-mode)
 
-(setq inferior-R-program-name "c:/usr/R/R-4.0.2/bin/x64/Rterm.exe")
-(setq ess-ask-for-ess-directory nil) ; do not prompt for directory
+;; do not prompt for directory when starting R
+(setq ess-ask-for-ess-directory nil) 
 
-;; (setq inferior-julia-program-name "C:/usr/julia/julia-d6f7c7c781/bin/julia-basic.exe")
+;; for latex stuff
+(use-package auctex
+  :ensure t)
 
-
-;; Appearance Related Things
-
-(custom-set-faces)
-
-;; show line numbers
-(global-linum-mode 1)
-(add-hook 'text-mode-hook 'turn-on-visual-line-mode)
-; no tool bar and add column numbers
+;; no tool bar and add column numbers
 (tool-bar-mode -1)
 (setq column-number-mode t)
 
@@ -291,16 +391,6 @@
   '(markdown-command "C:/usr/Pandoc/pandoc.exe")  ;; tell it where pandoc is
 )
 
-
-;; ;; sanityinc tomorrow night theme
-;; (use-package color-theme-sanityinc-tomorrow
-;;   :ensure t)
-;; (load-theme 'sanityinc-tomorrow-night t)
-
-;; tron theme
-(add-to-list 'custom-theme-load-path "C:/Users/jwile/.emacs.d/themes/")
-(load-theme 'tron-legacy t)
-
 (set-face-font 'default "-outline-Consolas-normal-r-normal-normal-*-*-96-96-c-*-iso8859-1")
 (set-face-font 'bold "-outline-Consolas-bold-r-normal-normal-*-*-96-96-c-*-iso8859-1")
 (set-face-font 'italic "-outline-Consolas-normal-i-normal-normal-*-*-96-96-c-*-iso8859-1")
@@ -323,20 +413,40 @@
 
 (setq ess-default-style 'my-style)
 
-;; ;; save files and configuration for nice restarting?
-;; (desktop-save-mode 1)
+;; sanityinc tomorrow night theme
+(use-package color-theme-sanityinc-tomorrow
+  :ensure t)
+(load-theme 'sanityinc-tomorrow-night t)
 
-;; ;; emaccs server supposed to reduce startup and shut down time but not much success
-;; (require 'server)
-;; (unless (server-running-p)
-;;   (server-start))
+;; ;; not sure this is needed anymore?
+;; (use-package flx
+;;   :ensure t
+;;   :config
+;;   (use-package flx-ido
+;;     :ensure t
+;;     :config
+;;     (ido-mode 1)
+;;     (ido-everywhere 1)
+;;     (flx-ido-mode 1)
+;;     (setq ido-enable-flex-matching t)
+;;     (setq ido-use-faces nil)
+;;     )
+;;   )
+
+;; ;; collapse / fold code chunks, no longer using
+;; (use-package folding
+;;   :ensure t
+;;   :config
+;;   (folding-add-to-marks-list 'ess-mode "##{{{" "##}}}" nil t)
+;;   (add-hook 'ess-mode-hook 'turn-on-folding-mode)
+;;   (global-set-key [f9] 'folding-hide-current-entry)
+;;   (global-set-key [f10] 'folding-show-current-entry))
+
+;; (setq inferior-julia-program-name "C:/usr/julia/julia-d6f7c7c781/bin/julia-basic.exe")
+
+
+;; ;; Appearance Related Things
+;; (custom-set-faces)
 
 ;; (add-to-list 'auto-mode-alist '("\\.Rmd" . poly-markdown-mode))
 ;; (add-to-list 'auto-mode-alist '("\\.Rmd" . poly-markdown+r-mode))
-
-;; turn on flyspell checking by default
-(add-hook 'text-mode-hook 'flyspell-mode)
-(add-hook 'prog-mode-hook 'flyspell-prog-mode)
-
-;; https://stackoverflow.com/questions/53659626/how-do-i-run-spell-check-on-an-rmarkdown-document-in-emacs-ess
-;; (add-to-list 'ispell-skip-region-alist '("^```" . "```$"))
