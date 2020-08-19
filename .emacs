@@ -30,6 +30,21 @@
  '(inferior-R-program-name "c:/usr/R/R-4.0.2/bin/x64/Rterm.exe")
  ;; do not restore or ask to save workspace
  '(inferior-R-args "--no-restore --no-save")
+
+ ;; more syntax highlighting
+ '(ess-R-font-lock-keywords
+   '((ess-R-fl-keyword:keywords . t)
+     (ess-R-fl-keyword:constants . t)
+     (ess-R-fl-keyword:modifiers . t)
+     (ess-R-fl-keyword:fun-defs . t)
+     (ess-R-fl-keyword:assign-ops . t)
+     (ess-R-fl-keyword:%op% . t)
+     (ess-fl-keyword:fun-calls . t)
+     (ess-fl-keyword:numbers . t)
+     (ess-fl-keyword:operators . t)
+     (ess-fl-keyword:delimiters . t)
+     (ess-fl-keyword:= . t)
+     (ess-R-fl-keyword:F&T . t)))
  
  ;; ;; julia lang location if using
  ;; '(inferior-julia-program-name "C:/usr/julia/julia-d6f7c7c781/bin/julia-basic.exe")
