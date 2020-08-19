@@ -402,6 +402,13 @@
 (define-key ess-r-mode-map "_" #'ess-insert-assign)
 (define-key inferior-ess-r-mode-map "_" #'ess-insert-assign)
 
+;; rainbow delimiters for easier viewing
+(use-package rainbow-delimiters
+  :ensure t
+  :config
+  ;; turn on for all programming modes by default
+  (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
+
 ;; sanityinc tomorrow night theme
 (use-package color-theme-sanityinc-tomorrow
   :ensure t)
