@@ -379,6 +379,11 @@
 ;; emacs speaks statistics --- central to using R in Emacs!
 (use-package ess
   :ensure t
+  :config
+  ;; RStudio style, like only 2 spaces for indent
+  (add-hook 'ess-mode-hook
+            (lambda ()
+              (ess-set-style 'RStudio)))
   :custom
   (ess-ask-for-ess-directory . nil))
 
@@ -391,13 +396,6 @@
   :ensure auctex
   :config
   (setq TeX-auto-save t))
-
-(add-to-list 'ess-style-alist
-             '(my-style
-               (ess-indent-level . 2)
-               ))
-
-(setq ess-style 'my-style)
 
 (define-key ess-r-mode-map "_" #'ess-insert-assign)
 (define-key inferior-ess-r-mode-map "_" #'ess-insert-assign)
