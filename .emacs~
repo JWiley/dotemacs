@@ -1,14 +1,41 @@
 ;; garbage colleciton
 (setq gc-cons-threshold 20000000 )
 
-;; location for R program
-(setq inferior-R-program-name "c:/usr/R/R-4.0.2/bin/x64/Rterm.exe")
-
 ;; repos
-(custom-set-variables '(package-archives
-                        '(("marmalade" . "https://marmalade-repo.org/packages/")
-                          ("melpa"     . "https://melpa.org/packages/")
-                          ("elpa"      . "https://elpa.gnu.org/packages/"))))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(column-number-mode t)
+ '(completion-ignore-case t t)
+ '(ess-R-font-lock-keywords
+   '((ess-R-fl-keyword:keywords . t)
+     (ess-R-fl-keyword:constants . t)
+     (ess-R-fl-keyword:modifiers . t)
+     (ess-R-fl-keyword:fun-defs . t)
+     (ess-R-fl-keyword:assign-ops . t)
+     (ess-R-fl-keyword:%op% . t)
+     (ess-fl-keyword:fun-calls . t)
+     (ess-fl-keyword:numbers . t)
+     (ess-fl-keyword:operators . t)
+     (ess-fl-keyword:delimiters . t)
+     (ess-fl-keyword:= . t)
+     (ess-R-fl-keyword:F&T . t)))
+ '(inferior-R-args "--no-restore --no-save")
+ '(inferior-R-program-name "c:/usr/R/R-4.0.5/bin/x64/Rterm.exe")
+ '(inferior-ess-r-program "c:/usr/R/R-4.0.5/bin/x64/Rterm.exe")
+ '(inhibit-startup-screen t)
+ '(ispell-program-name "c:/usr/hunspell/bin/hunspell.exe")
+ '(markdown-command "C:/usr/Pandoc/pandoc.exe")
+ '(package-archives
+   '(("melpa" . "https://melpa.org/packages/")
+     ("elpa" . "https://elpa.gnu.org/packages/")))
+ '(package-selected-packages
+   '(flycheck color-theme-sanityinc-tomorrow auctex ess treemacs-persp treemacs-magit treemacs-icons-dired treemacs-projectile treemacs yasnippet poly-R poly-markdown markdown-mode magit projectile company helm wc-mode diminish smooth-scrolling use-package))
+ '(read-buffer-completion-ignore-case t)
+ '(read-file-name-completion-ignore-case t)
+ '(send-mail-function 'mailclient-send-it))
 
 ;; use-package to auto get packages
 (package-initialize)
@@ -25,16 +52,6 @@
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)
 (setq default-buffer-file-coding-system 'utf-8)
-
-
-;; Make completion case-insensitive.
-(setq completion-ignore-case t)
-(custom-set-variables
- '(read-buffer-completion-ignore-case t)
- '(read-file-name-completion-ignore-case t))
-
-;; start emacs server
-(server-start)
 
 ;; show line numbers
 (use-package display-line-numbers
@@ -57,6 +74,9 @@
 
 ;; M-g to go to a specific line in a file
 (bind-key "M-g" 'goto-line)
+
+;; evaluate chunk in polymode 
+(bind-key "C-c e" 'polymode-eval-region-or-chunk)
 
 ;; org mode configuration
 (use-package org
@@ -111,7 +131,7 @@
   (("C-x C-f"       . helm-find-files)
    ("C-x C-b"       . helm-buffers-list)
    ("C-x b"         . helm-multi-files)
-   ("M-x"           . helm-M-x)
+   ;; ("M-x"           . helm-M-x)
    :map helm-find-files-map
    ("C-<backspace>" . helm-find-files-up-one-level)
    ("C-f"           . helm-execute-persistent-action)
@@ -146,6 +166,7 @@
 (helm-autoresize-mode 1)
 
 (use-package helm-flx
+  :ensure t
   :custom
   (helm-flx-for-helm-find-files t)
   (helm-flx-for-helm-locate t)
@@ -153,6 +174,7 @@
   (helm-flx-mode +1))
 
 (use-package swiper-helm
+  :ensure t
   :bind
   ("C-s" . swiper))
 
@@ -188,6 +210,15 @@
   (add-hook 'after-init-hook 'global-company-mode)
   )
 
+;; (use-package company-quickhelp
+;;   :ensure t
+;;   :config
+;;   ;; load globally
+;;   (company-quickhelp-mode)
+;;   ;; time before display of documentation popup
+;;   (setq company-quickhelp-delay 0.3))
+
+
 ;; use projectile for project management
 (use-package projectile
   :ensure t
@@ -200,15 +231,15 @@
 (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
 (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
 
-
 ;; on the fly spell checking
 (use-package flyspell
   :ensure t
-  :diminish)
+  :diminish
+  :config
+  ;; turn on flyspell checking by default
+  (add-hook 'text-mode-hook 'flyspell-mode)
+  (add-hook 'prog-mode-hook 'flyspell-prog-mode))
 
-;; turn on flyspell checking by default
-(add-hook 'text-mode-hook 'flyspell-mode)
-(add-hook 'prog-mode-hook 'flyspell-prog-mode)
 
 ;; git interface
 (use-package magit
@@ -242,9 +273,6 @@
 ;; sufficient for R + markdown?
 (use-package poly-R
   :ensure t)
-
-;; (add-to-list 'auto-mode-alist '("\\.md" . poly-markdown-mode))
-;; (add-to-list 'auto-mode-alist '("\\.Rmd" . poly-markdown-mode))
 
 ;; expand snippets of text
 (use-package yasnippet
@@ -303,7 +331,7 @@
 
     ;; The default width and height of the icons is 22 pixels. If you are
     ;; using a Hi-DPI display, uncomment this to double the icon size.
-    (treemacs-resize-icons 44)
+    ;; (treemacs-resize-icons 44)
 
     (treemacs-follow-mode t)
     (treemacs-filewatch-mode t)
@@ -341,112 +369,48 @@
   :ensure t
   :config (treemacs-set-scope-type 'Perspectives))
 
-; auto save bookmarks
-(setq
-   bookmark-default-file "~/OneDrive/.emacs.bmk"
-   bookmark-version-control t
-   bookmark-save-flag 1)
-
 ;; emacs speaks statistics --- central to using R in Emacs!
 (use-package ess
-  :ensure t)
+  :ensure t
+  :config
+  ;; RStudio style, like only 2 spaces for indent
+  (add-hook 'ess-mode-hook
+            (lambda ()
+              (ess-set-style 'RStudio)))
+  :custom
+  (ess-ask-for-ess-directory . nil))
 
 ;; only R features, not all ESS by default
 (require 'ess-r-mode)
 
-;; do not prompt for directory when starting R
-(setq ess-ask-for-ess-directory nil) 
-
 ;; for latex stuff
-(use-package auctex
-  :ensure t)
+(use-package tex
+  :defer t
+  :ensure auctex
+  :config
+  (setq TeX-auto-save t))
 
-;; no tool bar and add column numbers
-(tool-bar-mode -1)
-(setq column-number-mode t)
+(define-key ess-r-mode-map "_" #'ess-insert-assign)
+(define-key inferior-ess-r-mode-map "_" #'ess-insert-assign)
 
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(ess-R-font-lock-keywords
-   (quote
-    ((ess-R-fl-keyword:modifiers . t)
-     (ess-R-fl-keyword:fun-defs . t)
-     (ess-R-fl-keyword:keywords . t)
-     (ess-R-fl-keyword:assign-ops . t)
-     (ess-R-fl-keyword:constants . t)
-     (ess-fl-keyword:fun-calls . t)
-     (ess-fl-keyword:numbers . t)
-     (ess-fl-keyword:operators . t)
-     (ess-fl-keyword:delimiters . t)
-     (ess-fl-keyword:=)
-     (ess-R-fl-keyword:F&T)
-     (ess-R-fl-keyword:%op% . t))))
-
-  ;; '(inhibit-startup-screen t)
-  ;; '(initial-buffer-choice t)
-  ;; '(load-home-init-file t t)
-  '(markdown-command "C:/usr/Pandoc/pandoc.exe")  ;; tell it where pandoc is
-)
-
-(set-face-font 'default "-outline-Consolas-normal-r-normal-normal-*-*-96-96-c-*-iso8859-1")
-(set-face-font 'bold "-outline-Consolas-bold-r-normal-normal-*-*-96-96-c-*-iso8859-1")
-(set-face-font 'italic "-outline-Consolas-normal-i-normal-normal-*-*-96-96-c-*-iso8859-1")
-(set-face-font 'bold-italic "-outline-Consolas-bold-i-normal-normal-*-*-96-96-c-*-iso8859-1")
-
-(add-to-list 'ess-style-alist
-             '(my-style
-               (ess-indent-level . 2)
-               ;; (ess-first-continued-statement-offset . 2)
-               ;; (ess-continued-statement-offset . 0)
-               ;; (ess-brace-offset . -2)
-               ;; (ess-expression-offset . 2)
-               ;; (ess-else-offset . 0)
-               ;; (ess-close-brace-offset . 0)
-               ;; (ess-brace-imaginary-offset . 0)
-               ;; (ess-continued-brace-offset . 0)
-               ;; (ess-arg-function-offset . 2)
-	       ;; (ess-arg-function-offset-new-line . '(2))
-               ))
-
-(setq ess-default-style 'my-style)
+;; rainbow delimiters for easier viewing
+(use-package rainbow-delimiters
+  :ensure t
+  :config
+  ;; turn on for all programming modes by default
+  (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
 
 ;; sanityinc tomorrow night theme
 (use-package color-theme-sanityinc-tomorrow
   :ensure t)
 (load-theme 'sanityinc-tomorrow-night t)
 
-;; ;; not sure this is needed anymore?
-;; (use-package flx
-;;   :ensure t
-;;   :config
-;;   (use-package flx-ido
-;;     :ensure t
-;;     :config
-;;     (ido-mode 1)
-;;     (ido-everywhere 1)
-;;     (flx-ido-mode 1)
-;;     (setq ido-enable-flex-matching t)
-;;     (setq ido-use-faces nil)
-;;     )
-;;   )
+;; no tool bar and add column numbers
+(tool-bar-mode -1)
 
-;; ;; collapse / fold code chunks, no longer using
-;; (use-package folding
-;;   :ensure t
-;;   :config
-;;   (folding-add-to-marks-list 'ess-mode "##{{{" "##}}}" nil t)
-;;   (add-hook 'ess-mode-hook 'turn-on-folding-mode)
-;;   (global-set-key [f9] 'folding-hide-current-entry)
-;;   (global-set-key [f10] 'folding-show-current-entry))
-
-;; (setq inferior-julia-program-name "C:/usr/julia/julia-d6f7c7c781/bin/julia-basic.exe")
-
-
-;; ;; Appearance Related Things
-;; (custom-set-faces)
-
-;; (add-to-list 'auto-mode-alist '("\\.Rmd" . poly-markdown-mode))
-;; (add-to-list 'auto-mode-alist '("\\.Rmd" . poly-markdown+r-mode))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )

@@ -7,31 +7,10 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-archives
-   '(("marmalade" . "https://marmalade-repo.org/packages/")
-     ("melpa" . "https://melpa.org/packages/")
-     ("elpa" . "https://elpa.gnu.org/packages/")))
- '(package-selected-packages
-   '(color-theme-sanityinc-tomorrow
-     auctex ess treemacs-persp treemacs-magit
-     treemacs-icons-dired treemacs-projectile treemacs yasnippet
-     poly-R poly-markdown markdown-mode magit
-     projectile company helm wc-mode diminish
-     smooth-scrolling use-package))
- '(read-buffer-completion-ignore-case t)
- '(read-file-name-completion-ignore-case t)
- ;; get column numbers on by default
  '(column-number-mode t)
- ;; no splash screen
- '(inhibit-startup-message t)
- ;; Make completion case-insensitive. 
- '(completion-ignore-case t)
- ;; where is the Rterm located?
- '(inferior-R-program-name "c:/usr/R/R-4.0.2/bin/x64/Rterm.exe")
- ;; do not restore or ask to save workspace
- '(inferior-R-args "--no-restore --no-save")
-
- ;; more syntax highlighting
+ '(global-hl-line-mode t)
+ '(cursor-type 'bar)
+ '(completion-ignore-case t t)
  '(ess-R-font-lock-keywords
    '((ess-R-fl-keyword:keywords . t)
      (ess-R-fl-keyword:constants . t)
@@ -45,16 +24,20 @@
      (ess-fl-keyword:delimiters . t)
      (ess-fl-keyword:= . t)
      (ess-R-fl-keyword:F&T . t)))
- 
- ;; ;; julia lang location if using
- ;; '(inferior-julia-program-name "C:/usr/julia/julia-d6f7c7c781/bin/julia-basic.exe")
-
- ;; spelling program exe location
- ;; https://sourceforge.net/projects/ezwinports/files/
+ '(inferior-R-args "--no-restore --no-save")
+ '(inferior-R-program-name "c:/usr/R/R-4.1.0/bin/x64/Rterm.exe")
+ '(inferior-ess-r-program "c:/usr/R/R-4.1.0/bin/x64/Rterm.exe")
+ '(inhibit-startup-screen t)
  '(ispell-program-name "c:/usr/hunspell/bin/hunspell.exe")
- ;; location of pandoc for rendering / converting markdown
  '(markdown-command "C:/usr/Pandoc/pandoc.exe")
- )
+ '(package-archives
+   '(("melpa" . "https://melpa.org/packages/")
+     ("elpa" . "https://elpa.gnu.org/packages/")))
+ '(package-selected-packages
+   '(flycheck color-theme-sanityinc-tomorrow auctex ess treemacs-persp treemacs-magit treemacs-icons-dired treemacs-projectile treemacs yasnippet poly-R poly-markdown markdown-mode magit projectile company helm wc-mode diminish smooth-scrolling use-package))
+ '(read-buffer-completion-ignore-case t)
+ '(read-file-name-completion-ignore-case t)
+ '(send-mail-function 'mailclient-send-it))
 
 ;; use-package to auto get packages
 (package-initialize)
@@ -93,6 +76,9 @@
 
 ;; M-g to go to a specific line in a file
 (bind-key "M-g" 'goto-line)
+
+;; evaluate chunk in polymode 
+(bind-key "C-c e" 'polymode-eval-region-or-chunk)
 
 ;; org mode configuration
 (use-package org
@@ -225,6 +211,15 @@
 		      :background "steelblue")
   (add-hook 'after-init-hook 'global-company-mode)
   )
+
+;; (use-package company-quickhelp
+;;   :ensure t
+;;   :config
+;;   ;; load globally
+;;   (company-quickhelp-mode)
+;;   ;; time before display of documentation popup
+;;   (setq company-quickhelp-delay 0.3))
+
 
 ;; use projectile for project management
 (use-package projectile
@@ -415,4 +410,9 @@
 ;; no tool bar and add column numbers
 (tool-bar-mode -1)
 
-
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
