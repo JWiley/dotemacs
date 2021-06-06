@@ -1,4 +1,4 @@
-;; garbage colleciton
+;; garbage collection
 (setq gc-cons-threshold 20000000 )
 
 ;; repos
