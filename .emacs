@@ -8,9 +8,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(column-number-mode t)
- '(global-hl-line-mode t)
- '(cursor-type 'bar)
  '(completion-ignore-case t t)
+ '(cursor-type 'bar)
  '(ess-R-font-lock-keywords
    '((ess-R-fl-keyword:keywords . t)
      (ess-R-fl-keyword:constants . t)
@@ -24,17 +23,16 @@
      (ess-fl-keyword:delimiters . t)
      (ess-fl-keyword:= . t)
      (ess-R-fl-keyword:F&T . t)))
+ '(global-hl-line-mode t)
  '(inferior-R-args "--no-restore --no-save")
  '(inferior-R-program-name "c:/usr/R/R-4.1.0/bin/x64/Rterm.exe")
  '(inferior-ess-r-program "c:/usr/R/R-4.1.0/bin/x64/Rterm.exe")
  '(inhibit-startup-screen t)
  '(ispell-program-name "c:/usr/hunspell/bin/hunspell.exe")
  '(markdown-command "C:/usr/Pandoc/pandoc.exe")
- '(package-archives
-   '(("melpa" . "https://melpa.org/packages/")
-     ("elpa" . "https://elpa.gnu.org/packages/")))
+ '(package-archives '(("melpa" . "https://melpa.org/packages/")))
  '(package-selected-packages
-   '(flycheck color-theme-sanityinc-tomorrow auctex ess treemacs-persp treemacs-magit treemacs-icons-dired treemacs-projectile treemacs yasnippet poly-R poly-markdown markdown-mode magit projectile company helm wc-mode diminish smooth-scrolling use-package))
+   '(flycheck color-theme-sanityinc-tomorrow ess treemacs-persp treemacs-magit treemacs-icons-dired treemacs-projectile treemacs yasnippet poly-R poly-markdown markdown-mode magit projectile company helm wc-mode diminish smooth-scrolling use-package))
  '(read-buffer-completion-ignore-case t)
  '(read-file-name-completion-ignore-case t)
  '(send-mail-function 'mailclient-send-it))
@@ -266,15 +264,28 @@
 
 ;; markdown mode
 (use-package markdown-mode
+  :ensure t
+  :mode ("README\\.md\\'" . gfm-mode)
+  :init (setq markdown-command "multimarkdown"))
+
+;; various polymode
+(use-package polymode
   :ensure t)
 
-;; various poly modes
-(use-package poly-markdown
-  :ensure t)
+;; ;; various poly modes
+;; (use-package poly-markdown
+;;   :ensure t)
 
 ;; sufficient for R + markdown?
 (use-package poly-R
   :ensure t)
+
+;; associate the new polymode to Rmd files:
+(add-to-list 'auto-mode-alist
+             '("\\.[rR]md\\'" . poly-gfm+r-mode))
+
+;; uses braces around code block language strings:
+(setq markdown-code-block-braces t)
 
 ;; expand snippets of text
 (use-package yasnippet
@@ -385,10 +396,25 @@
 ;; only R features, not all ESS by default
 (require 'ess-r-mode)
 
+
+;; (use-package csv-mode
+;;   :ensure t
+;;   :config
+;;   (setq csv-header-lines 1))
+
+;; (use-package ess-view-data
+;;   :ensure t
+;;   :config
+;;   ess-view-data-backend-list: data.table+magrittr
+;;   ;; ess-view-data-print-backend-list: kable
+;;   ess-view-data-save-backend-list: data.table::fwrite
+;;   )
+
+
 ;; for latex stuff
 (use-package tex
   :defer t
-  :ensure auctex
+  ;; :ensure auctex
   :config
   (setq TeX-auto-save t))
 
@@ -402,6 +428,13 @@
   ;; turn on for all programming modes by default
   (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
 
+;; ace-window make it easy to switch between multiple windows in emacs
+(use-package ace-window
+  :ensure t
+  :config
+  ;; bind switching windows to Alt-Space
+  (global-set-key (kbd "M-SPC") 'ace-window))
+
 ;; sanityinc tomorrow night theme
 (use-package color-theme-sanityinc-tomorrow
   :ensure t)
@@ -409,6 +442,7 @@
 
 ;; no tool bar and add column numbers
 (tool-bar-mode -1)
+(menu-bar-mode -1)
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
