@@ -23,6 +23,13 @@
      (ess-fl-keyword:delimiters . t)
      (ess-fl-keyword:= . t)
      (ess-R-fl-keyword:F&T . t)))
+ '(ess-use-flymake nil)
+ '(ess-view-data-current-backend 'data\.table+magrittr)
+ '(ess-view-data-current-save-backend 'data\.table::fwrite)
+ ;; '(ess-view-data-current-update-print-backend 'kable)
+ '(flycheck-checker-error-threshold 1000)
+ '(flycheck-lintr-linters
+   "with_defaults(line_length_linter(110), object_name_linter = NULL)")
  '(global-hl-line-mode t)
  '(inferior-R-args "--no-restore --no-save")
  '(inferior-R-program-name "c:/usr/R/R-4.1.0/bin/x64/Rterm.exe")
@@ -30,7 +37,9 @@
  '(inhibit-startup-screen t)
  '(ispell-program-name "c:/usr/hunspell/bin/hunspell.exe")
  '(markdown-command "C:/usr/Pandoc/pandoc.exe")
- '(package-archives '(("melpa" . "https://melpa.org/packages/")))
+ '(package-archives
+   '(("melpa" . "https://melpa.org/packages/")
+     ("elpa" . "https://elpa.gnu.org/packages/")))
  '(package-selected-packages
    '(flycheck color-theme-sanityinc-tomorrow ess treemacs-persp treemacs-magit treemacs-icons-dired treemacs-projectile treemacs yasnippet poly-R poly-markdown markdown-mode magit projectile company helm wc-mode diminish smooth-scrolling use-package))
  '(read-buffer-completion-ignore-case t)
@@ -64,7 +73,7 @@
 
 ;; scroll one line at a time
 (use-package smooth-scrolling
-  :ensure t  
+  :ensure t
   :config
   (smooth-scrolling-mode 1))
 
@@ -75,7 +84,7 @@
 ;; M-g to go to a specific line in a file
 (bind-key "M-g" 'goto-line)
 
-;; evaluate chunk in polymode 
+;; evaluate chunk in polymode
 (bind-key "C-c e" 'polymode-eval-region-or-chunk)
 
 ;; org mode configuration
@@ -230,6 +239,13 @@
 (projectile-mode +1)
 (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
 (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+
+
+;; use Flycheck (note flymake disabled above):
+(use-package flycheck
+  :ensure t
+  :init
+  (global-flycheck-mode t))
 
 ;; on the fly spell checking
 (use-package flyspell
@@ -397,24 +413,23 @@
 (require 'ess-r-mode)
 
 
-;; (use-package csv-mode
-;;   :ensure t
-;;   :config
-;;   (setq csv-header-lines 1))
+(use-package csv-mode
+  :ensure t
+  :config
+  (setq csv-header-lines 1))
 
-;; (use-package ess-view-data
-;;   :ensure t
-;;   :config
-;;   ess-view-data-backend-list: data.table+magrittr
-;;   ;; ess-view-data-print-backend-list: kable
-;;   ess-view-data-save-backend-list: data.table::fwrite
-;;   )
-
+(use-package ess-view-data
+  :ensure t
+  :bind
+  (("C-x C-k v" . ess-view-data-print))
+   ;; :map magit-status-mode-map
+   ;; ("q"       . magit-quit-session))
+  )
 
 ;; for latex stuff
 (use-package tex
   :defer t
-  ;; :ensure auctex
+  :ensure auctex
   :config
   (setq TeX-auto-save t))
 
