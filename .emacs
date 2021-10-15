@@ -26,14 +26,13 @@
  '(ess-use-flymake nil)
  '(ess-view-data-current-backend 'data\.table+magrittr)
  '(ess-view-data-current-save-backend 'data\.table::fwrite)
- ;; '(ess-view-data-current-update-print-backend 'kable)
  '(flycheck-checker-error-threshold 1000)
  '(flycheck-lintr-linters
    "with_defaults(line_length_linter(110), object_name_linter = NULL)")
  '(global-hl-line-mode t)
  '(inferior-R-args "--no-restore --no-save")
- '(inferior-R-program-name "c:/usr/R/R-4.1.0/bin/x64/Rterm.exe")
- '(inferior-ess-r-program "c:/usr/R/R-4.1.0/bin/x64/Rterm.exe")
+ '(inferior-R-program-name "c:/usr/R/R-4.1.1/bin/x64/Rterm.exe")
+ '(inferior-ess-r-program "c:/usr/R/R-4.1.1/bin/x64/Rterm.exe")
  '(inhibit-startup-screen t)
  '(ispell-program-name "c:/usr/hunspell/bin/hunspell.exe")
  '(markdown-command "C:/usr/Pandoc/pandoc.exe")
@@ -41,7 +40,7 @@
    '(("melpa" . "https://melpa.org/packages/")
      ("elpa" . "https://elpa.gnu.org/packages/")))
  '(package-selected-packages
-   '(flycheck color-theme-sanityinc-tomorrow ess treemacs-persp treemacs-magit treemacs-icons-dired treemacs-projectile treemacs yasnippet poly-R poly-markdown markdown-mode magit projectile company helm wc-mode diminish smooth-scrolling use-package))
+   '(fira-code-mode flycheck color-theme-sanityinc-tomorrow ess treemacs-persp treemacs-magit treemacs-icons-dired treemacs-projectile treemacs yasnippet poly-R poly-markdown markdown-mode magit projectile company helm wc-mode diminish smooth-scrolling use-package))
  '(read-buffer-completion-ignore-case t)
  '(read-file-name-completion-ignore-case t)
  '(send-mail-function 'mailclient-send-it))
@@ -455,9 +454,22 @@
   :ensure t)
 (load-theme 'sanityinc-tomorrow-night t)
 
+;; ;; nord theme
+;; (use-package nord-theme
+;;   :ensure t)
+;; (load-theme 'nord t)
+
+(use-package fira-code-mode
+  :config
+  ;; (global-fira-code-mode)
+  (fira-code-mode-set-font)
+  :hook prog-mode
+  )
+
 ;; no tool bar and add column numbers
 (tool-bar-mode -1)
 (menu-bar-mode -1)
+(scroll-bar-mode -1)
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
