@@ -460,8 +460,10 @@
 ;; (load-theme 'nord t)
 
 (use-package fira-code-mode
+  ;; List of ligatures to turn off
+  :custom (fira-code-mode-disabled-ligatures '("x"))
+  ;; other config
   :config
-  ;; (global-fira-code-mode)
   (fira-code-mode-set-font)
   :hook prog-mode
   )
